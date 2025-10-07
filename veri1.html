@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analiz - Cafe Sipariş Sistemi</title>
+    <style>
+        :root {
+            --primary-color: #8B4513;
+            --secondary-color: #D2691E;
+            --accent-color: #F4A460;
+            --light-color: #FFF8DC;
+            --dark-color: #654321;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: bold;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .card-title {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .card-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+        
+        .chart-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .chart-title {
+            color: var(--primary-color);
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .chart {
+            height: 300px;
+            position: relative;
+        }
+        
+        .table-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            font-weight: bold;
+        }
+        
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .date-filter {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        
+        .date-input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .filter-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .filter-btn:hover {
+            background-color: var(--dark-color);
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #777;
+        }
+        
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .nav-links {
+                display: flex;
+                gap: 15px;
+            }
+            
+            .nav-links a {
+                margin-left: 0;
+            }
+            
+            .date-filter {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">Analiz Paneli</div>
+            <div class="nav-links">
+                <a href="index1.html">Sipariş Sayfası</a>
+                <a href="kontrol1.html">Kontrol Paneli</a>
+            </div>
+        </header>
+        
+        <div class="date-filter">
+            <label for="start-date">Başlangıç Tarihi:</label>
+            <input type="date" id="start-date" class="date-input">
+            
+            <label for="end-date">Bitiş Tarihi:</label>
+            <input type="date" id="end-date" class="date-input">
+            
+            <button id="apply-filter" class="filter-btn">Filtrele</button>
+            <button id="reset-filter" class="filter-btn">Sıfırla</button>
+        </div>
+        
+        <div class="dashboard">
+            <div class="card">
+                <div class="card-title">Toplam Sipariş</div>
+                <div class="card-value" id="total-orders">0</div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">Toplam Gelir</div>
+                <div class="card-value" id="total-revenue">₺0.00</div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">Ortalama Sipariş</div>
+                <div class="card-value" id="avg-order">₺0.00</div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">En Popüler Ürün</div>
+                <div class="card-value" id="popular-item">-</div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <h2 class="chart-title">Ürün Satışları</h2>
+            <div class="chart" id="sales-chart">
+                <!-- Satış grafiği buraya eklenecek -->
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <h2 class="chart-title">Günlük Gelir</h2>
+            <div class="chart" id="revenue-chart">
+                <!-- Gelir grafiği buraya eklenecek -->
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <h2 class="chart-title">Masa Bazlı Gelir</h2>
+            <table id="table-revenue">
+                <thead>
+                    <tr>
+                        <th>Masa</th>
+                        <th>Sipariş Sayısı</th>
+                        <th>Toplam Gelir</th>
+                        <th>Ortalama Sipariş</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Masa gelirleri buraya eklenecek -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="table-container">
+            <h2 class="chart-title">Sipariş Geçmişi</h2>
+            <table id="order-history">
+                <thead>
+                    <tr>
+                        <th>Sipariş ID</th>
+                        <th>Tarih</th>
+                        <th>Masa</th>
+                        <th>Ürünler</th>
+                        <th>Toplam</th>
+                        <th>Durum</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Sipariş geçmişi buraya eklenecek -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // JSONBin.io API bilgileri
+        const BIN_ID = '68e4620ad0ea881f4097e383';
+        const API_KEY = '$2a$10$V1jYPveOQ.2oEb4QsKv7A.SXw2w8pPG.5gNlGJtbxBHEFUEbMZu/O';
+        const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+        
+        // Tarih filtresi
+        let dateFilter = {
+            startDate: null,
+            endDate: null
+        };
+        
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tarih filtrelerini ayarla
+            setupDateFilters();
+            
+            // Siparişleri yükle
+            loadOrders();
+            
+            // Filtre butonlarına event listener ekle
+            document.getElementById('apply-filter').addEventListener('click', function() {
+                applyDateFilter();
+            });
+            
+            document.getElementById('reset-filter').addEventListener('click', function() {
+                resetDateFilter();
+            });
+        });
+        
+        // Tarih filtrelerini ayarla
+        function setupDateFilters() {
+            const today = new Date();
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(today.getDate() - 7);
+            
+            // Varsayılan tarihleri ayarla (son 7 gün)
+            document.getElementById('start-date').valueAsDate = oneWeekAgo;
+            document.getElementById('end-date').valueAsDate = today;
+            
+            dateFilter.startDate = oneWeekAgo;
+            dateFilter.endDate = today;
+        }
+        
+        // Tarih filtresini uygula
+        function applyDateFilter() {
+            const startDateInput = document.getElementById('start-date');
+            const endDateInput = document.getElementById('end-date');
+            
+            dateFilter.startDate = startDateInput.value ? new Date(startDateInput.value) : null;
+            dateFilter.endDate = endDateInput.value ? new Date(endDateInput.value) : null;
+            
+            // Bitiş tarihine saat 23:59:59 ekle
+            if (dateFilter.endDate) {
+                dateFilter.endDate.setHours(23, 59, 59, 999);
+            }
+            
+            // Siparişleri yeniden yükle
+            loadOrders();
+        }
+        
+        // Tarih filtresini sıfırla
+        function resetDateFilter() {
+            setupDateFilters();
+            loadOrders();
+        }
+        
+        // Siparişleri yükle
+        async function loadOrders() {
+            try {
+                const orders = await getOrdersFromJSONBin();
+                
+                // Filtre uygula
+                const filteredOrders = filterOrdersByDate(orders);
+                
+                // İstatistikleri güncelle
+                updateStatistics(filteredOrders);
+                
+                // Grafikleri güncelle
+                updateCharts(filteredOrders);
+                
+                // Tabloları güncelle
+                updateTables(filteredOrders);
+            } catch (error) {
+                console.error('Siparişler yüklenirken hata oluştu:', error);
+            }
+        }
+        
+        // JSONBin.io'dan siparişleri al
+        async function getOrdersFromJSONBin() {
+            const response = await fetch(API_URL + '/latest', {
+                method: 'GET',
+                headers: {
+                    'X-Master-Key': API_KEY,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const data = await response.json();
+            return data.record || [];
+        }
+        
+        // Siparişleri tarihe göre filtrele
+        function filterOrdersByDate(orders) {
+            if (!dateFilter.startDate && !dateFilter.endDate) {
+                return orders;
+            }
+            
+            return orders.filter(order => {
+                const orderDate = new Date(order.timestamp);
+                
+                if (dateFilter.startDate && orderDate < dateFilter.startDate) {
+                    return false;
+                }
+                
+                if (dateFilter.endDate && orderDate > dateFilter.endDate) {
+                    return false;
+                }
+                
+                return true;
+            });
+        }
+        
+        // İstatistikleri güncelle
+        function updateStatistics(orders) {
+            // Toplam sipariş
+            document.getElementById('total-orders').textContent = orders.length;
+            
+            // Toplam gelir
+            const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
+            document.getElementById('total-revenue').textContent = `₺${totalRevenue.toFixed(2)}`;
+            
+            // Ortalama sipariş
+            const avgOrder = orders.length > 0 ? totalRevenue / orders.length : 0;
+            document.getElementById('avg-order').textContent = `₺${avgOrder.toFixed(2)}`;
+            
+            // En popüler ürün
+            const popularItem = getMostPopularItem(orders);
+            document.getElementById('popular-item').textContent = popularItem;
+        }
+        
+        // En popüler ürünü bul
+        function getMostPopularItem(orders) {
+            const itemCounts = {};
+            
+            orders.forEach(order => {
+                for (const [item, quantity] of Object.entries(order.items)) {
+                    if (itemCounts[item]) {
+                        itemCounts[item] += quantity;
+                    } else {
+                        itemCounts[item] = quantity;
+                    }
+                }
+            });
+            
+            if (Object.keys(itemCounts).length === 0) {
+                return '-';
+            }
+            
+            const mostPopular = Object.keys(itemCounts).reduce((a, b) => 
+                itemCounts[a] > itemCounts[b] ? a : b
+            );
+            
+            return getItemDisplayName(mostPopular);
+        }
+        
+        // Grafikleri güncelle
+        function updateCharts(orders) {
+            updateSalesChart(orders);
+            updateRevenueChart(orders);
+        }
+        
+        // Satış grafiğini güncelle
+        function updateSalesChart(orders) {
+            const chartContainer = document.getElementById('sales-chart');
+            
+            // Basit bir tablo oluştur (gerçek uygulamada Chart.js gibi bir kütüphane kullanılmalı)
+            const itemSales = calculateItemSales(orders);
+            
+            if (Object.keys(itemSales).length === 0) {
+                chartContainer.innerHTML = '<div class="no-data">Bu dönem için satış verisi bulunmamaktadır.</div>';
+                return;
+            }
+            
+            let chartHtml = '<div style="display: flex; flex-direction: column; gap: 10px; height: 100%; justify-content: center;">';
+            
+            for (const [item, sales] of Object.entries(itemSales)) {
+                const percentage = (sales.quantity / getTotalItemsSold(orders)) * 100;
+                chartHtml += `
+                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                        <div style="width: 120px; font-weight: bold;">${getItemDisplayName(item)}</div>
+                        <div style="flex: 1; background-color: #f0f0f0; border-radius: 4px; overflow: hidden;">
+                            <div style="background-color: var(--accent-color); height: 20px; width: ${percentage}%; display: flex; align-items: center; padding-left: 10px; color: white; font-weight: bold;">
+                                ${sales.quantity} adet (₺${sales.revenue.toFixed(2)})
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            chartHtml += '</div>';
+            chartContainer.innerHTML = chartHtml;
+        }
+        
+        // Gelir grafiğini güncelle
+        function updateRevenueChart(orders) {
+            const chartContainer = document.getElementById('revenue-chart');
+            
+            // Günlük gelirleri hesapla
+            const dailyRevenue = calculateDailyRevenue(orders);
+            
+            if (Object.keys(dailyRevenue).length === 0) {
+                chartContainer.innerHTML = '<div class="no-data">Bu dönem için gelir verisi bulunmamaktadır.</div>';
+                return;
+            }
+            
+            // Maksimum geliri bul (grafik yüksekliği için)
+            const maxRevenue = Math.max(...Object.values(dailyRevenue).map(day => day.revenue));
+            
+            let chartHtml = '<div style="display: flex; height: 100%; align-items: flex-end; justify-content: space-around; border-bottom: 2px solid #ddd; padding-bottom: 30px;">';
+            
+            for (const [date, data] of Object.entries(dailyRevenue)) {
+                const heightPercentage = (data.revenue / maxRevenue) * 80;
+                chartHtml += `
+                    <div style="display: flex; flex-direction: column; align-items: center; height: 100%;">
+                        <div style="background-color: var(--primary-color); width: 30px; height: ${heightPercentage}%; border-radius: 4px 4px 0 0;"></div>
+                        <div style="margin-top: 10px; font-size: 0.8rem; text-align: center;">
+                            <div>${formatDateShort(date)}</div>
+                            <div style="font-weight: bold;">₺${data.revenue.toFixed(0)}</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            chartHtml += '</div>';
+            chartContainer.innerHTML = chartHtml;
+        }
+        
+        // Tabloları güncelle
+        function updateTables(orders) {
+            updateTableRevenue(orders);
+            updateOrderHistory(orders);
+        }
+        
+        // Masa gelir tablosunu güncelle
+        function updateTableRevenue(orders) {
+            const tableBody = document.querySelector('#table-revenue tbody');
+            tableBody.innerHTML = '';
+            
+            const tableStats = calculateTableStats(orders);
+            
+            if (Object.keys(tableStats).length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Bu dönem için veri bulunmamaktadır.</td></tr>';
+                return;
+            }
+            
+            for (const [table, stats] of Object.entries(tableStats)) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${table}</td>
+                    <td>${stats.count}</td>
+                    <td>₺${stats.revenue.toFixed(2)}</td>
+                    <td>₺${stats.average.toFixed(2)}</td>
+                `;
+                tableBody.appendChild(row);
+            }
+        }
+        
+        // Sipariş geçmişi tablosunu güncelle
+        function updateOrderHistory(orders) {
+            const tableBody = document.querySelector('#order-history tbody');
+            tableBody.innerHTML = '';
+            
+            if (orders.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Bu dönem için sipariş bulunmamaktadır.</td></tr>';
+                return;
+            }
+            
+            // Siparişleri ters sırada göster (en yeni en üstte)
+            orders.slice().reverse().forEach(order => {
+                const row = document.createElement('tr');
+                const orderDate = new Date(order.timestamp);
+                const formattedDate = orderDate.toLocaleString('tr-TR');
+                
+                // Ürün listesini kısalt
+                let itemsText = '';
+                const itemKeys = Object.keys(order.items);
+                if (itemKeys.length > 0) {
+                    itemsText = getItemDisplayName(itemKeys[0]) + (itemKeys.length > 1 ? ` +${itemKeys.length - 1} ürün` : '');
+                }
+                
+                row.innerHTML = `
+                    <td>${order.id}</td>
+                    <td>${formattedDate}</td>
+                    <td>${order.tableNumber}</td>
+                    <td>${itemsText}</td>
+                    <td>₺${order.total.toFixed(2)}</td>
+                    <td style="color: ${order.status === 'paid' ? 'var(--success-color)' : 'var(--warning-color)'}; font-weight: bold;">
+                        ${order.status === 'paid' ? 'ÖDENDİ' : 'BEKLİYOR'}
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Ürün satışlarını hesapla
+        function calculateItemSales(orders) {
+            const itemSales = {};
+            
+            orders.forEach(order => {
+                for (const [item, quantity] of Object.entries(order.items)) {
+                    if (itemSales[item]) {
+                        itemSales[item].quantity += quantity;
+                        itemSales[item].revenue += quantity * getItemPrice(item);
+                    } else {
+                        itemSales[item] = {
+                            quantity: quantity,
+                            revenue: quantity * getItemPrice(item)
+                        };
+                    }
+                }
+            });
+            
+            return itemSales;
+        }
+        
+        // Toplam satılan ürün sayısını hesapla
+        function getTotalItemsSold(orders) {
+            let total = 0;
+            
+            orders.forEach(order => {
+                for (const quantity of Object.values(order.items)) {
+                    total += quantity;
+                }
+            });
+            
+            return total;
+        }
+        
+        // Günlük gelirleri hesapla
+        function calculateDailyRevenue(orders) {
+            const dailyRevenue = {};
+            
+            orders.forEach(order => {
+                const orderDate = new Date(order.timestamp).toDateString();
+                
+                if (dailyRevenue[orderDate]) {
+                    dailyRevenue[orderDate].revenue += order.total;
+                    dailyRevenue[orderDate].count += 1;
+                } else {
+                    dailyRevenue[orderDate] = {
+                        revenue: order.total,
+                        count: 1
+                    };
+                }
+            });
+            
+            return dailyRevenue;
+        }
+        
+        // Masa istatistiklerini hesapla
+        function calculateTableStats(orders) {
+            const tableStats = {};
+            
+            orders.forEach(order => {
+                const table = order.tableNumber;
+                
+                if (tableStats[table]) {
+                    tableStats[table].count += 1;
+                    tableStats[table].revenue += order.total;
+                } else {
+                    tableStats[table] = {
+                        count: 1,
+                        revenue: order.total
+                    };
+                }
+            });
+            
+            // Ortalamayı hesapla
+            for (const table of Object.keys(tableStats)) {
+                tableStats[table].average = tableStats[table].revenue / tableStats[table].count;
+            }
+            
+            return tableStats;
+        }
+        
+        // Ürün adını görüntüleme adına dönüştür
+        function getItemDisplayName(itemKey) {
+            const itemNames = {
+                'simit': 'Simit',
+                'pogaca': 'Poğaça',
+                'sandvic': 'Sandviç',
+                'turk-kahvesi': 'Türk Kahvesi',
+                'latte': 'Latte',
+                'cay': 'Çay'
+            };
+            
+            return itemNames[itemKey] || itemKey;
+        }
+        
+        // Ürün fiyatını al
+        function getItemPrice(itemKey) {
+            const prices = {
+                'simit': 12.00,
+                'pogaca': 8.00,
+                'sandvic': 25.00,
+                'turk-kahvesi': 15.00,
+                'latte': 22.00,
+                'cay': 8.00
+            };
+            
+            return prices[itemKey] || 0;
+        }
+        
+        // Tarihi kısa formatta göster
+        function formatDateShort(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+        }
+    </script>
+</body>
+</html>

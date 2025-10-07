@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cafe Sipariş Sistemi</title>
+    <style>
+        :root {
+            --primary-color: #8B4513;
+            --secondary-color: #D2691E;
+            --accent-color: #F4A460;
+            --light-color: #FFF8DC;
+            --dark-color: #654321;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 20px;
+        }
+        
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .menu-section {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .menu-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .menu-item {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .menu-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .item-name {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+        
+        .item-price {
+            color: var(--secondary-color);
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .quantity-btn {
+            background-color: var(--accent-color);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .quantity-input {
+            width: 50px;
+            text-align: center;
+            margin: 0 10px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .notes-section {
+            margin-top: 20px;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .table-section {
+            margin-top: 20px;
+        }
+        
+        .table-select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .order-summary {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .order-total {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 2px solid var(--primary-color);
+        }
+        
+        .submit-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 1.1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+        
+        .submit-btn:hover {
+            background-color: var(--dark-color);
+        }
+        
+        .confirmation {
+            text-align: center;
+            padding: 20px;
+            background-color: var(--success-color);
+            color: white;
+            border-radius: 4px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .admin-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .admin-link a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .menu-items {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">KAHVE DÜNYASI</div>
+            <p>Lezzetli kahveler ve taze yiyecekler</p>
+        </header>
+        
+        <div class="menu-section">
+            <h2 class="section-title">Yiyecekler</h2>
+            <div class="menu-items">
+                <div class="menu-item">
+                    <div class="item-name">Simit</div>
+                    <div class="item-price">₺12.00</div>
+                    <div class="quantity-control">
+                        <button class="quantity-btn minus" data-item="simit">-</button>
+                        <input type="number" class="quantity-input" data-item="simit" value="0" min="0">
+                        <button class="quantity-btn plus" data-item="simit">+</button>
+                    </div>
+                </div>
+                
+                <div class="menu-item">
+                    <div class="item-name">Poğaça</div>
+                    <div class="item-price">₺8.00</div>
+                    <div class="quantity-control">
+                        <button class="quantity-btn minus" data-item="pogaca">-</button>
+                        <input type="number" class="quantity-input" data-item="pogaca" value="0" min="0">
+                        <button class="quantity-btn plus" data-item="pogaca">+</button>
+                    </div>
+                </div>
+                
+                <div class="menu-item">
+                    <div class="item-name">Sandviç</div>
+                    <div class="item-price">₺25.00</div>
+                    <div class="quantity-control">
+                        <button class="quantity-btn minus" data-item="sandvic">-</button>
+                        <input type="number" class="quantity-input" data-item="sandvic" value="0" min="0">
+                        <button class="quantity-btn plus" data-item="sandvic">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="menu-section">
+            <h2 class="section-title">İçecekler</h2>
+            <div class="menu-items">
+                <div class="menu-item">
+                    <div class="item-name">Türk Kahvesi</div>
+                    <div class="item-price">₺15.00</div>
+                    <div class="quantity-control">
+                        <button class="quantity-btn minus" data-item="turk-kahvesi">-</button>
+                        <input type="number" class="quantity-input" data-item="turk-kahvesi" value="0" min="0">
+                        <button class="quantity-btn plus" data-item="turk-kahvesi">+</button>
+                    </div>
+                </div>
+                
+                <div class="menu-item">
+                    <div class="item-name">Latte</div>
+                    <div class="item-price">₺22.00</div>
+                    <div class="quantity-control">
+                        <button class="quantity-btn minus" data-item="latte">-</button>
+                        <input type="number" class="quantity-input" data-item="latte" value="0" min="0">
+                        <button class="quantity-btn plus" data-item="latte">+</button>
+                    </div>
+                </div>
+                
+                <div class="menu-item">
+                    <div class="item-name">Çay</div>
+                    <div class="item-price">₺8.00</div>
+                    <div class="quantity-control">
+                        <button class="quantity-btn minus" data-item="cay">-</button>
+                        <input type="number" class="quantity-input" data-item="cay" value="0" min="0">
+                        <button class="quantity-btn plus" data-item="cay">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="menu-section">
+            <h2 class="section-title">Özel İstekler</h2>
+            <div class="notes-section">
+                <textarea id="special-notes" placeholder="Siparişinizle ilgili özel isteklerinizi buraya yazabilirsiniz..."></textarea>
+            </div>
+            
+            <!-- Masa Numarası Seçimi Eklendi -->
+            <div class="table-section">
+                <label for="table-number"><strong>Masa Numaranızı Seçiniz:</strong></label>
+                <select id="table-number" class="table-select">
+                    <option value="">Masa Seçiniz</option>
+                    <option value="1">Masa 1</option>
+                    <option value="2">Masa 2</option>
+                    <option value="3">Masa 3</option>
+                    <option value="4">Masa 4</option>
+                    <option value="5">Masa 5</option>
+                    <option value="6">Masa 6</option>
+                    <option value="7">Masa 7</option>
+                    <option value="8">Masa 8</option>
+                    <option value="9">Masa 9</option>
+                    <option value="10">Masa 10</option>
+                    <option value="takeaway">Paket Servis</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="order-summary">
+            <h2 class="section-title">Sipariş Özeti</h2>
+            <div id="order-items">
+                <!-- Sipariş öğeleri buraya dinamik olarak eklenecek -->
+            </div>
+            <div class="order-total">
+                <span>Toplam:</span>
+                <span id="total-amount">₺0.00</span>
+            </div>
+            
+            <button id="submit-order" class="submit-btn">Siparişi Gönder</button>
+            
+            <div id="order-confirmation" class="confirmation">
+                Siparişiniz alınmıştır!
+            </div>
+        </div>
+        
+        <div class="admin-link">
+        </div>
+    </div>
+
+    <script>
+        // JSONBin.io API bilgileri
+        const BIN_ID = '68e4620ad0ea881f4097e383';
+        const API_KEY = '$2a$10$V1jYPveOQ.2oEb4QsKv7A.SXw2w8pPG.5gNlGJtbxBHEFUEbMZu/O';
+        const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+        
+        // Ürün fiyatları
+        const prices = {
+            'simit': 12.00,
+            'pogaca': 8.00,
+            'sandvic': 25.00,
+            'turk-kahvesi': 15.00,
+            'latte': 22.00,
+            'cay': 8.00
+        };
+        
+        // Sipariş verileri
+        let order = {
+            items: {},
+            notes: '',
+            tableNumber: '',
+            total: 0,
+            status: 'pending',
+            timestamp: null
+        };
+        
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', function() {
+            // Miktar butonlarına event listener ekle
+            document.querySelectorAll('.quantity-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const item = this.dataset.item;
+                    const input = document.querySelector(`.quantity-input[data-item="${item}"]`);
+                    
+                    if (this.classList.contains('plus')) {
+                        input.value = parseInt(input.value) + 1;
+                    } else if (this.classList.contains('minus') && parseInt(input.value) > 0) {
+                        input.value = parseInt(input.value) - 1;
+                    }
+                    
+                    updateOrder();
+                });
+            });
+            
+            // Miktar inputlarına event listener ekle
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.addEventListener('change', function() {
+                    if (parseInt(this.value) < 0) this.value = 0;
+                    updateOrder();
+                });
+            });
+            
+            // Notlar alanına event listener ekle
+            document.getElementById('special-notes').addEventListener('input', function() {
+                order.notes = this.value;
+            });
+            
+            // Masa numarası seçimine event listener ekle
+            document.getElementById('table-number').addEventListener('change', function() {
+                order.tableNumber = this.value;
+            });
+            
+            // Sipariş gönder butonuna event listener ekle
+            document.getElementById('submit-order').addEventListener('click', function() {
+                submitOrder();
+            });
+            
+            // Siparişi güncelle
+            updateOrder();
+        });
+        
+        // Siparişi güncelle
+        function updateOrder() {
+            // Sipariş öğelerini sıfırla
+            order.items = {};
+            order.total = 0;
+            
+            // Tüm miktar inputlarını kontrol et
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                const item = input.dataset.item;
+                const quantity = parseInt(input.value);
+                
+                if (quantity > 0) {
+                    order.items[item] = quantity;
+                    order.total += quantity * prices[item];
+                }
+            });
+            
+            // Sipariş özetini güncelle
+            updateOrderSummary();
+        }
+        
+        // Sipariş özetini güncelle
+        function updateOrderSummary() {
+            const orderItemsContainer = document.getElementById('order-items');
+            const totalAmountElement = document.getElementById('total-amount');
+            
+            // Önceki içeriği temizle
+            orderItemsContainer.innerHTML = '';
+            
+            // Sipariş öğelerini ekle
+            for (const [item, quantity] of Object.entries(order.items)) {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'order-item';
+                
+                const itemName = document.querySelector(`.item-name[data-item="${item}"]`)?.textContent || item;
+                const itemTotal = quantity * prices[item];
+                
+                itemElement.innerHTML = `
+                    <span>${itemName} x ${quantity}</span>
+                    <span>₺${itemTotal.toFixed(2)}</span>
+                `;
+                
+                orderItemsContainer.appendChild(itemElement);
+            }
+            
+            // Toplam tutarı güncelle
+            totalAmountElement.textContent = `₺${order.total.toFixed(2)}`;
+        }
+        
+        // Siparişi gönder
+        async function submitOrder() {
+            if (order.total === 0) {
+                alert('Lütfen en az bir ürün seçin!');
+                return;
+            }
+            
+            if (!order.tableNumber) {
+                alert('Lütfen masa numaranızı seçiniz!');
+                return;
+            }
+            
+            // Sipariş zamanını ekle
+            order.timestamp = new Date().toISOString();
+            order.id = Date.now();
+            
+            try {
+                // Siparişi JSONBin.io'ya kaydet
+                await saveOrderToJSONBin();
+                
+                // Onay mesajını göster
+                document.getElementById('order-confirmation').style.display = 'block';
+                
+                // Formu sıfırla
+                resetForm();
+                
+                // 3 saniye sonra onay mesajını gizle
+                setTimeout(() => {
+                    document.getElementById('order-confirmation').style.display = 'none';
+                }, 3000);
+            } catch (error) {
+                console.error('Sipariş gönderilirken hata oluştu:', error);
+                alert('Sipariş gönderilirken bir hata oluştu. Lütfen tekrar deneyin.');
+            }
+        }
+        
+        // Siparişi JSONBin.io'ya kaydet
+        async function saveOrderToJSONBin() {
+            // Mevcut siparişleri al
+            const response = await fetch(API_URL + '/latest', {
+                method: 'GET',
+                headers: {
+                    'X-Master-Key': API_KEY,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const data = await response.json();
+            let orders = data.record || [];
+            
+            // Yeni siparişi ekle
+            orders.push(order);
+            
+            // Güncellenmiş siparişleri JSONBin.io'ya kaydet
+            const updateResponse = await fetch(API_URL, {
+                method: 'PUT',
+                headers: {
+                    'X-Master-Key': API_KEY,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(orders)
+            });
+            
+            if (!updateResponse.ok) {
+                throw new Error('Veri güncellenemedi');
+            }
+        }
+        
+        // Formu sıfırla
+        function resetForm() {
+            // Tüm miktar inputlarını sıfırla
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.value = 0;
+            });
+            
+            // Notlar alanını temizle
+            document.getElementById('special-notes').value = '';
+            
+            // Masa numarasını sıfırla
+            document.getElementById('table-number').value = '';
+            
+            // Sipariş verilerini sıfırla
+            order = {
+                items: {},
+                notes: '',
+                tableNumber: '',
+                total: 0,
+                status: 'pending',
+                timestamp: null
+            };
+            
+            // Sipariş özetini güncelle
+            updateOrderSummary();
+        }
+    </script>
+</body>
+</html>
